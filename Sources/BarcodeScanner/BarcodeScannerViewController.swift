@@ -83,9 +83,15 @@ public class BarcodeScannerViewController: UIViewController, @preconcurrency AVC
         
         view.addSubview(imageView)
         
-        torchlightButton.frame = CGRect(x: view.frame.midX - 25, y: view.frame.maxY - 125, width: 50, height: 50)
+        torchlightButton.frame = CGRect(x: view.frame.midX - 25, y: view.frame.maxY - 160, width: 60, height: 60)
         torchlightButton.layer.cornerRadius = 25
         view.addSubview(torchlightButton)
+        
+        torchlightButton.addTarget(self, action: #selector(didTapTorchlightButton), for: .touchUpInside)
+    }
+    
+    @objc func didTapTorchlightButton() {
+        toggleFlash()
     }
     
     private func notifyFailure(error: Error) {
@@ -128,6 +134,36 @@ public class BarcodeScannerViewController: UIViewController, @preconcurrency AVC
     
     public override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return .portrait
+    }
+    
+    func toggleFlash() {
+        // Get the AVCaptureDevice instance representing the camera
+        guard let device = AVCaptureDevice.default(for: .video) else {
+            print("Camera not found")
+            return
+        }
+        
+        // Check if the device supports flash (torch)
+        if device.hasTorch {
+            do {
+                // Lock the device for configuration changes
+                try device.lockForConfiguration()
+                
+                // Toggle the torch mode: if it's on, turn it off; if it's off, turn it on
+                if device.torchMode == .on {
+                    device.torchMode = .off  // Turn off the flash
+                } else {
+                    try device.setTorchModeOn(level: 1.0)  // Turn on the flash at full brightness
+                }
+                
+                // Unlock the device after configuration
+                device.unlockForConfiguration()
+            } catch {
+                print("Error while configuring flash: \(error)")
+            }
+        } else {
+            print("Device does not support flash.")
+        }
     }
 }
 
