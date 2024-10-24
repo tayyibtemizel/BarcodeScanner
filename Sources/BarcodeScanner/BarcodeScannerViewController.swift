@@ -15,6 +15,14 @@ public class BarcodeScannerViewController: UIViewController, @preconcurrency AVC
     private var previewLayer: AVCaptureVideoPreviewLayer!
     public weak var delegate: BarcodeScannerDelegate?
     
+    private let imageView: UIImageView = {
+        let iv = UIImageView()
+        iv.contentMode = .scaleAspectFit
+        iv.image = UIImage(named: "viewfinder")
+
+        return iv
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -60,6 +68,12 @@ public class BarcodeScannerViewController: UIViewController, @preconcurrency AVC
         view.layer.addSublayer(previewLayer)
         
         captureSession.startRunning()
+        
+        let eightyPercentOfWidth = view.frame.size.width * 0.8
+
+        imageView.frame = CGRect(x: view.frame.midX - (eightyPercentOfWidth / 2), y: view.frame.midY - (eightyPercentOfWidth / 2), width:eightyPercentOfWidth, height: eightyPercentOfWidth)
+        
+        view.addSubview(imageView)
     }
     
     private func notifyFailure(error: Error) {
