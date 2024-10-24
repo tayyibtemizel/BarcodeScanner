@@ -13,13 +13,13 @@ public class BarcodeScannerViewController: UIViewController, @preconcurrency AVC
     
     private var captureSession: AVCaptureSession!
     private var previewLayer: AVCaptureVideoPreviewLayer!
-    private var videoCaptureDevice: AVCaptureDevice!
     public weak var delegate: BarcodeScannerDelegate?
     
     private let imageView: UIImageView = {
         let iv = UIImageView()
-        iv.contentMode = .scaleAspectFill
+        iv.contentMode = .scaleAspectFit
         iv.image = UIImage(named: "viewfinder")
+
         return iv
     }()
     
@@ -28,22 +28,6 @@ public class BarcodeScannerViewController: UIViewController, @preconcurrency AVC
         btn.setImage(UIImage(systemName: "flashlight.off.fill"), for: .normal)
         btn.tintColor = .white
         btn.backgroundColor = .black.withAlphaComponent(0.65)
-        return btn
-    }()
-    
-    private let backButton: UIButton = {
-        
-        let backButtonConfig = UIImage.SymbolConfiguration(pointSize: 35, weight: .bold, scale: .large)
-        let backButtonImg = UIImage(systemName: "multiply.circle.fill", withConfiguration: backButtonConfig)
-        
-        let btn = UIButton()
-        btn.setImage(backButtonImg, for: .normal)
-        btn.tintColor = .systemGray5
-        btn.backgroundColor = .systemGray
-        btn.layer.borderWidth = 10
-        btn.layer.borderColor = UIColor.systemGray5.cgColor
-        btn.layer.cornerRadius = 35 / 2
-        btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
     
@@ -57,8 +41,6 @@ public class BarcodeScannerViewController: UIViewController, @preconcurrency AVC
             print("Camera not available.")
             return
         }
-        
-        self.videoCaptureDevice = videoCaptureDevice
         
         
         let videoInput: AVCaptureDeviceInput
@@ -96,16 +78,13 @@ public class BarcodeScannerViewController: UIViewController, @preconcurrency AVC
         captureSession.startRunning()
         
         let eightyPercentOfWidth = view.frame.size.width * 0.8
-        
-        backButton.frame = CGRect(x: 15, y: 15, width: 35, height: 35)
-        view.addSubview(backButton)
 
         imageView.frame = CGRect(x: view.frame.midX - (eightyPercentOfWidth / 2), y: view.frame.midY - (eightyPercentOfWidth / 2), width:eightyPercentOfWidth, height: eightyPercentOfWidth)
         
         view.addSubview(imageView)
         
         torchlightButton.frame = CGRect(x: view.frame.midX - 25, y: view.frame.maxY - 160, width: 60, height: 60)
-        torchlightButton.layer.cornerRadius = 30
+        torchlightButton.layer.cornerRadius = 25
         view.addSubview(torchlightButton)
         
         torchlightButton.addTarget(self, action: #selector(didTapTorchlightButton), for: .touchUpInside)
@@ -113,10 +92,6 @@ public class BarcodeScannerViewController: UIViewController, @preconcurrency AVC
     
     @objc func didTapTorchlightButton() {
         toggleFlash()
-    }
-    
-    @objc func didTapBackButton() {
-        self.dismiss(animated: true)
     }
     
     private func notifyFailure(error: Error) {
@@ -162,22 +137,27 @@ public class BarcodeScannerViewController: UIViewController, @preconcurrency AVC
     }
     
     func toggleFlash() {
+        // Get the AVCaptureDevice instance representing the camera
+        guard let device = AVCaptureDevice.default(for: .video) else {
+            print("Camera not found")
+            return
+        }
         
         // Check if the device supports flash (torch)
-        if videoCaptureDevice.hasTorch {
+        if device.hasTorch {
             do {
                 // Lock the device for configuration changes
-                try videoCaptureDevice.lockForConfiguration()
+                try device.lockForConfiguration()
                 
                 // Toggle the torch mode: if it's on, turn it off; if it's off, turn it on
-                if videoCaptureDevice.torchMode == .on {
-                    videoCaptureDevice.torchMode = .off  // Turn off the flash
+                if device.torchMode == .on {
+                    device.torchMode = .off  // Turn off the flash
                 } else {
-                    try videoCaptureDevice.setTorchModeOn(level: 1.0)  // Turn on the flash at full brightness
+                    try device.setTorchModeOn(level: 1.0)  // Turn on the flash at full brightness
                 }
                 
                 // Unlock the device after configuration
-                videoCaptureDevice.unlockForConfiguration()
+                device.unlockForConfiguration()
             } catch {
                 print("Error while configuring flash: \(error)")
             }
