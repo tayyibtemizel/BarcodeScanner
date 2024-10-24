@@ -23,6 +23,14 @@ public class BarcodeScannerViewController: UIViewController, @preconcurrency AVC
         return iv
     }()
     
+    private let torchlightButton: UIButton = {
+        let btn = UIButton()
+        btn.setImage(UIImage(systemName: "flashlight.off.fill"), for: .normal)
+        btn.tintColor = .white
+        btn.backgroundColor = .black.withAlphaComponent(0.65)
+        return btn
+    }()
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -74,6 +82,10 @@ public class BarcodeScannerViewController: UIViewController, @preconcurrency AVC
         imageView.frame = CGRect(x: view.frame.midX - (eightyPercentOfWidth / 2), y: view.frame.midY - (eightyPercentOfWidth / 2), width:eightyPercentOfWidth, height: eightyPercentOfWidth)
         
         view.addSubview(imageView)
+        
+        torchlightButton.frame = CGRect(x: view.frame.midX - 25, y: view.frame.maxY - 125, width: 50, height: 50)
+        torchlightButton.layer.cornerRadius = 25
+        view.addSubview(torchlightButton)
     }
     
     private func notifyFailure(error: Error) {
