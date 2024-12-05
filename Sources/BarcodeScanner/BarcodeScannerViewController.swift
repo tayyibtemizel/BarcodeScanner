@@ -48,7 +48,6 @@ public class BarcodeScannerViewController: UIViewController, @preconcurrency AVC
         btn.layer.borderWidth = 10
         btn.layer.borderColor = UIColor.systemGray5.cgColor
         btn.layer.cornerRadius = 35 / 2
-        btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
     
